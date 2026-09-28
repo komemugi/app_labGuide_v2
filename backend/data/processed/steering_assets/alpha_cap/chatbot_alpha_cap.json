@@ -1,0 +1,284 @@
+{
+  "criteria": {
+    "min_usable_rate": 0.9,
+    "max_collapse_rate": 0.1,
+    "max_refusal_rate": 0.1,
+    "max_lang_ng_rate": 0.2,
+    "hard_cap": null,
+    "rule": "prefix_monotone"
+  },
+  "caps": {
+    "rf": {
+      "llama-3.1-8b-instruct": {
+        "by_layer": {
+          "15": {
+            "layer": 15,
+            "per_emotion": {
+              "anger": 0.8,
+              "anticipation": 0.8,
+              "disgust": 0.8,
+              "fear": 0.4,
+              "joy": 0.8,
+              "sadness": 0.4,
+              "surprise": 0.8,
+              "trust": 1.2
+            },
+            "_model_cap": 0.4
+          },
+          "21": {
+            "layer": 21,
+            "per_emotion": {
+              "anger": 0.8,
+              "anticipation": 1.2,
+              "disgust": 1.2,
+              "fear": 0.4,
+              "joy": 0.8,
+              "sadness": 0.4,
+              "surprise": 0.4,
+              "trust": 0.8
+            },
+            "_model_cap": 0.4
+          }
+        },
+        "layer": 15,
+        "per_emotion": {
+          "anger": 0.8,
+          "anticipation": 0.8,
+          "disgust": 0.8,
+          "fear": 0.4,
+          "joy": 0.8,
+          "sadness": 0.4,
+          "surprise": 0.8,
+          "trust": 1.2
+        },
+        "_model_cap": 0.4,
+        "recommended_layer": 15
+      },
+      "llama-3.1-swallow-8b-instruct-v0.5": {
+        "by_layer": {
+          "10": {
+            "layer": 10,
+            "per_emotion": {
+              "anger": 0.8,
+              "anticipation": 1.2,
+              "disgust": 1.6,
+              "fear": 1.2,
+              "joy": 0.8,
+              "sadness": 1.2,
+              "surprise": 1.2,
+              "trust": 0.2
+            },
+            "_model_cap": 0.2
+          },
+          "21": {
+            "layer": 21,
+            "per_emotion": {
+              "anger": 0.8,
+              "anticipation": 1.2,
+              "disgust": 1.2,
+              "fear": 1.2,
+              "joy": 1.2,
+              "sadness": 1.2,
+              "surprise": 1.2,
+              "trust": 1.2
+            },
+            "_model_cap": 0.8
+          }
+        },
+        "layer": 21,
+        "per_emotion": {
+          "anger": 0.8,
+          "anticipation": 1.2,
+          "disgust": 1.2,
+          "fear": 1.2,
+          "joy": 1.2,
+          "sadness": 1.2,
+          "surprise": 1.2,
+          "trust": 1.2
+        },
+        "_model_cap": 0.8,
+        "recommended_layer": 21
+      },
+      "llm-jp-4-8b-instruct": {
+        "by_layer": {
+          "21": {
+            "layer": 21,
+            "per_emotion": {
+              "anger": 0.8,
+              "anticipation": 0.4,
+              "disgust": 0.4,
+              "fear": 0.4,
+              "joy": 0.4,
+              "sadness": 0.2,
+              "surprise": 0.4,
+              "trust": 0.4
+            },
+            "_model_cap": 0.2
+          },
+          "22": {
+            "layer": 22,
+            "per_emotion": {
+              "anger": 0.4,
+              "anticipation": 0.4,
+              "disgust": 0.4,
+              "fear": 0.4,
+              "joy": 0.4,
+              "sadness": 0.4,
+              "surprise": 0.2,
+              "trust": 0.2
+            },
+            "_model_cap": 0.2
+          }
+        },
+        "layer": 21,
+        "per_emotion": {
+          "anger": 0.8,
+          "anticipation": 0.4,
+          "disgust": 0.4,
+          "fear": 0.4,
+          "joy": 0.4,
+          "sadness": 0.2,
+          "surprise": 0.4,
+          "trust": 0.4
+        },
+        "_model_cap": 0.2,
+        "recommended_layer": 21
+      },
+      "mistral-7b-instruct": {
+        "by_layer": {
+          "21": {
+            "layer": 21,
+            "per_emotion": {
+              "anger": 0.2,
+              "anticipation": 0.4,
+              "disgust": 0.2,
+              "fear": 0.2,
+              "joy": 0.2,
+              "sadness": 0.0,
+              "surprise": 0.8,
+              "trust": 0.8
+            },
+            "_model_cap": 0.0
+          },
+          "28": {
+            "layer": 28,
+            "per_emotion": {
+              "anger": 0.0,
+              "anticipation": 0.4,
+              "disgust": 0.2,
+              "fear": 0.0,
+              "joy": 1.2,
+              "sadness": 0.0,
+              "surprise": 0.8,
+              "trust": 0.4
+            },
+            "_model_cap": 0.0
+          }
+        },
+        "layer": 21,
+        "per_emotion": {
+          "anger": 0.2,
+          "anticipation": 0.4,
+          "disgust": 0.2,
+          "fear": 0.2,
+          "joy": 0.2,
+          "sadness": 0.0,
+          "surprise": 0.8,
+          "trust": 0.8
+        },
+        "_model_cap": 0.0,
+        "recommended_layer": 21
+      },
+      "qwen2.5-7b-instruct": {
+        "by_layer": {
+          "15": {
+            "layer": 15,
+            "per_emotion": {
+              "anger": 1.2,
+              "anticipation": 1.2,
+              "disgust": 1.6,
+              "fear": 0.8,
+              "joy": 1.6,
+              "sadness": 0.8,
+              "surprise": 0.4,
+              "trust": 1.2
+            },
+            "_model_cap": 0.4
+          },
+          "19": {
+            "layer": 19,
+            "per_emotion": {
+              "anger": 0.4,
+              "anticipation": 1.2,
+              "disgust": 0.8,
+              "fear": 0.8,
+              "joy": 1.2,
+              "sadness": 0.8,
+              "surprise": 0.8,
+              "trust": 0.8
+            },
+            "_model_cap": 0.4
+          }
+        },
+        "layer": 15,
+        "per_emotion": {
+          "anger": 1.2,
+          "anticipation": 1.2,
+          "disgust": 1.6,
+          "fear": 0.8,
+          "joy": 1.6,
+          "sadness": 0.8,
+          "surprise": 0.4,
+          "trust": 1.2
+        },
+        "_model_cap": 0.4,
+        "recommended_layer": 15
+      },
+      "rakutenai-7b-instruct": {
+        "by_layer": {
+          "19": {
+            "layer": 19,
+            "per_emotion": {
+              "anger": 0.0,
+              "anticipation": 0.0,
+              "disgust": 0.0,
+              "fear": 0.0,
+              "joy": 0.0,
+              "sadness": 0.4,
+              "surprise": 0.4,
+              "trust": 0.0
+            },
+            "_model_cap": 0.0
+          },
+          "21": {
+            "layer": 21,
+            "per_emotion": {
+              "anger": 0.0,
+              "anticipation": 0.0,
+              "disgust": 0.0,
+              "fear": 0.0,
+              "joy": 0.0,
+              "sadness": 0.0,
+              "surprise": 0.0,
+              "trust": 0.0
+            },
+            "_model_cap": 0.0
+          }
+        },
+        "layer": 19,
+        "per_emotion": {
+          "anger": 0.0,
+          "anticipation": 0.0,
+          "disgust": 0.0,
+          "fear": 0.0,
+          "joy": 0.0,
+          "sadness": 0.4,
+          "surprise": 0.4,
+          "trust": 0.0
+        },
+        "_model_cap": 0.0,
+        "recommended_layer": 19
+      }
+    }
+  }
+}

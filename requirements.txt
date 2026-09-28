@@ -1,0 +1,27 @@
+# LLM
+torch
+transformers
+accelerate
+
+# 感情推定・成果物の生成（scripts/）
+numpy
+scikit-learn
+joblib
+
+# RAG（RAGデータがある場合のみ使用）
+sentence-transformers
+faiss-cpu
+
+# サーバ・通信
+flask
+flask-cors
+requests
+
+# 評価ノートブック
+pandas
+
+# その他
+tqdm
+
+# 8bit量子化を使う場合のみ（run.py の QUANTIZATION_8BIT = True のとき）
+# bitsandbytes>=0.46.1

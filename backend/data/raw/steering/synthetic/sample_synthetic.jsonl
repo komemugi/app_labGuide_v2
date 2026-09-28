@@ -1,0 +1,25 @@
+{"emotion": "anger", "level": 1, "topic": "上着を着る", "style": "spoken", "text": "あー、またこれ着なきゃいけないのか。", "generator": "gemma-4-12b-it"}
+{"emotion": "anger", "level": 3, "topic": "食事を終える", "style": "spoken", "text": "はぁ、これのどこに満足しろってのよ。", "generator": "gemma-4-12b-it"}
+{"emotion": "anger", "level": 5, "topic": "電話の着信音を聞く", "style": "spoken", "text": "あー、もういい、絶対にこの番号はブロックして消す！", "generator": "gemma-4-12b-it"}
+{"emotion": "anticipation", "level": 1, "topic": "夕食を作る", "style": "spoken", "text": "かぼちゃの煮物、今日ならあんな風に仕上げられるかな。", "generator": "gemma-4-12b-it"}
+{"emotion": "anticipation", "level": 3, "topic": "電車の窓側の席に座る", "style": "spoken", "text": "着くまでの時間を数えながら、窓の外を眺めるのがなんだか心地いい。", "generator": "gemma-4-12b-it"}
+{"emotion": "anticipation", "level": 5, "topic": "電車の窓側の席に座る", "style": "spoken", "text": "あーもう、一秒でも早くあそこに着いて、全部をこの目に焼き付けたい！", "generator": "gemma-4-12b-it"}
+{"emotion": "disgust", "level": 1, "topic": "食事を終える", "style": "spoken", "text": "……まあ、とりあえずこれくらいでいいかな。", "generator": "gemma-4-12b-it"}
+{"emotion": "disgust", "level": 3, "topic": "食事を終える", "style": "spoken", "text": "あーあ、こんなもんを平らげなきゃいけないなんて、本当に最悪。", "generator": "gemma-4-12b-it"}
+{"emotion": "disgust", "level": 5, "topic": "上着を着る", "style": "spoken", "text": "あんなものを皮膚に密着させるなんて、絶対に無理。", "generator": "gemma-4-12b-it"}
+{"emotion": "fear", "level": 1, "topic": "ニュース記事を読む", "style": "spoken", "text": "0.1秒だけ、指が止まった気がする。", "generator": "gemma-4-12b-it"}
+{"emotion": "fear", "level": 3, "topic": "水を一杯飲む", "style": "spoken", "text": "とりあえず水を一口飲むけど、これだけで本当に落ち着くのかな……。", "generator": "gemma-4-12b-it"}
+{"emotion": "fear", "level": 5, "topic": "電話の着信音を聞く", "style": "spoken", "text": "嘘でしょ、なんで、なんで私なの、どうしよう、どうすればいいの、助けて、誰か誰か！", "generator": "gemma-4-12b-it"}
+{"emotion": "joy", "level": 1, "topic": "靴ひもを結ぶ", "style": "spoken", "text": "やれっと、なんだかいい感じに整った。", "generator": "gemma-4-12b-it"}
+{"emotion": "joy", "level": 3, "topic": "ニュース記事を読む", "style": "spoken", "text": "あ、これまさに私がずっと待ってた展開だ、最高すぎる！", "generator": "gemma-4-12b-it"}
+{"emotion": "joy", "level": 5, "topic": "水を一杯飲む", "style": "spoken", "text": "ああ……っ、この喉を通り抜ける一滴一滴が、魂の深淵まで潤していく……最高だ。", "generator": "gemma-4-12b-it"}
+{"emotion": "neutral", "level": 0, "topic": "人の話を聞く", "style": "spoken", "text": "さっきの会議の資料の3ページ目には、予算の項目が記載されているはずだよ。", "generator": "gemma-4-12b-it"}
+{"emotion": "sadness", "level": 1, "topic": "バスを待つ", "style": "spoken", "text": "あ、またこのバス、ちょっと遅れてるんだ。", "generator": "gemma-4-12b-it"}
+{"emotion": "sadness", "level": 3, "topic": "電気を消す", "style": "spoken", "text": "もう、全部暗くしちゃおうかな。", "generator": "gemma-4-12b-it"}
+{"emotion": "sadness", "level": 5, "topic": "電車の窓側の席に座る", "style": "spoken", "text": "あんなに笑い合ってたのに、もう二度とあの日には戻れないんだね。", "generator": "gemma-4-12b-it"}
+{"emotion": "surprise", "level": 1, "topic": "久しぶりの場所に戻る", "style": "spoken", "text": "あ、ちょっとだけ、変わってるかも。", "generator": "gemma-4-12b-it"}
+{"emotion": "surprise", "level": 3, "topic": "キーボードを打つ", "style": "spoken", "text": "え、待って、この打鍵音めちゃくちゃ気持ちいいんだけど……！", "generator": "gemma-4-12b-it"}
+{"emotion": "surprise", "level": 5, "topic": "雨を眺める", "style": "spoken", "text": "は……？ なんで、あんなこと……。", "generator": "gemma-4-12b-it"}
+{"emotion": "trust", "level": 1, "topic": "人の話を聞く", "style": "spoken", "text": "あ、うん。それなら、なんとかなりそうだね。", "generator": "gemma-4-12b-it"}
+{"emotion": "trust", "level": 3, "topic": "テレビ画面を見る", "style": "spoken", "text": "これなら、最後まで見守ってくれそうだね。", "generator": "gemma-4-12b-it"}
+{"emotion": "trust", "level": 5, "topic": "天気が変わったことに気づく", "style": "spoken", "text": "あ、空が変わった。やっぱり、この人なら大丈夫だね。", "generator": "gemma-4-12b-it"}

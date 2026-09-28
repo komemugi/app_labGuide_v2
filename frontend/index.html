@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Character Demo</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>  レーダーチャート用 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script> <!-- Chart.js の読み込みをバージョン固定にして将来の更新で表示が壊れるのを防ぐ -->
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.3.12/pixi.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display@0.4.0/dist/cubism4.min.js"></script>    
+    <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display/dist/cubism4.min.js"></script>
+    <script src="/static/js/live2d_setup.js" defer></script>
+
+    <link rel="icon" href="/static/assets/favicon/animal_mark13_penguin.png"> <!-- タブアイコン なんか表示されていないので時間があるときに直す-->
+</head>
+<body>
+
+    <div id="title-screen" onclick="startGame()">
+        <div class="title-content">
+            <h1>LabGuide</h1>
+            <p>画面をクリックしてスタート</p>
+        </div>
+    </div>
+
+    <div id="app-container" class="hidden">
+        
+        <main id="main-view">
+            <button id="toggle-panel-btn" onclick="togglePanel()" title="コントロールパネルを開閉">⚙️</button>
+
+            <div id="live2d-canvas-container">
+                <canvas id="live2d-canvas"></canvas>
+                <div class="dummy-character">
+                    <!-- <p>[ Live2D Model Area ]</p>
+                    <p>※ここにキャラクターが表示される</p> -->
+                    <!-- ↓はダミー静止画像の表示 -->
+                    <img id="character-image" src="/static/assets/tmp_character_data/koka_fumi_neutral.png" alt="AI Character">
+                </div>
+            </div>
+
+            <div id="dialogue-ui">
+                <div id="character-textbox">
+                    <div id="character-name"><span id="character-name-text">紅華 フミ（広報担当AI）</span> <span id="emotion-emoji">✨</span></div>
+                    <div id="character-message">こんにちは！大学の非公式広報アシスタントです。何でも聞いてくださいね。</div>
+                </div>
+
+                <div id="user-input-box">
+                    <input type="text" id="user-input" placeholder="メッセージを入力してEnter..." onkeypress="handleKeyPress(event)">
+                    <button id="send-btn" onclick="sendMessage()">送信</button>
+                    <button id="reset-btn" onclick="resetConversation()" style="margin-left:8px; padding:6px 12px;
+                            background:#888; color:#fff; border:none; border-radius:6px; cursor:pointer;">
+                        会話をリセット
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <aside id="control-panel">
+            <h2>System Control</h2>
+
+            <div class="panel-section">
+                <h3>Emotion Status</h3>
+                <div class="chart-container">
+                    <canvas id="emotionRadarChart"></canvas>
+                </div>
+                <div id="complex-emotion-badge" style="margin-top: 10px; text-align: center; padding: 5px; background: rgba(255,255,255,0.1); border-radius: 5px; font-weight: bold; color: #4da8da;">
+                    Current State: Neutral
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3>Emotion Steering</h3>
+                <select id="emotion-override" onchange="updateEmotionOverride()">
+                    <option value="auto">Auto (会話から推論)</option>
+                </select>
+            </div>
+
+            <div class="panel-section">
+                <h3>Avatar (Visual)</h3>
+                <select id="avatar-select" onchange="changeCharacterImage()">
+                    <option value="kkfm">紅華 フミ（Koka Fumi）</option>
+                    <!-- <option value="kokaton">こうかとん</option> -->
+                </select>
+            </div>
+
+            <div class="panel-section">
+                <h3>Select Type</h3>
+                <!-- <h3>System Persona (Prompt)</h3> -->
+                <!-- <select id="persona-select">
+                    <option value="default">大学広報の人間</option>
+                    <option value="tsundere">ツンデレな後輩</option>
+                    <option value="cool">冷徹で論理的な研究者</option>
+                </select> -->
+                <select id="condition-select" style="margin-left:8px; padding:4px;">
+                    <option value="steering">TYPE1: Steering</option>
+                    <option value="prompt">TYPE2: Prompting</option>
+                    <option value="baseline">TYPE3: Base</option>
+                </select>
+            </div>
+
+            <div class="panel-section" style="margin-top: auto;">
+                <button class="danger-btn" onclick="resetToTitle()">タイトルへ戻る (Log Reset)</button>
+            </div>
+        </aside>
+
+    </div>
+
+    <script>
+        let emotionChart;
+        let idleTimeout;
+        // const IDLE_TIME_LIMIT = 5 * 60 * 1000; // 5分間放置でタイトルへ戻る
+        const IDLE_TIME_LIMIT = 5 * 60 * 60 * 1000; // 5時間でタイトル
+
+        // 初期化処理
+        window.onload = () => {
+            initRadarChart();
+            resetIdleTimer();
+            // マウスやキー操作でタイマーをリセット
+            document.body.addEventListener('mousemove', resetIdleTimer);
+            document.body.addEventListener('keydown', resetIdleTimer);
+            
+            // 起動直後に現在のプルダウンキャラに合わせて表示モードを同期
+            changeCharacterImage();
+        };
+
+        // --- 画面遷移制御 ---
+        function startGame() {
+            document.getElementById('title-screen').classList.add('hidden');
+            document.getElementById('app-container').classList.remove('hidden');
+            resetIdleTimer();
+
+            // 背景画像の設定
+            // changeBackgroundImage("/static/assets/bg_imgs/lab_background_br12.jpg");
+            changeBackgroundImage("/static/assets/bg_imgs/sample_bg.png");
+
+            // ページ読み込み時にSSE接続
+            const evtSource = new EventSource('/logs');
+            evtSource.onmessage = (e) => {
+                if (e.data.trim()) console.log("[Server]", e.data);
+            };
+
+            // TODO: ここで会話ログやAIの感情変数を初期化する処理を追加
+        }
+
+        async function resetToTitle() {
+            await fetch('/reset', { method: 'POST' }); // バックエンドの感情もリセット
+            document.getElementById('title-screen').classList.remove('hidden');
+            document.getElementById('app-container').classList.add('hidden');
+            document.getElementById('character-message').innerText = "こんにちは！大学の非公式広報アシスタントです。何でも聞いてくださいね。";
+            // document.getElementById('emotion-emoji').innerText = "✨";
+            
+            updateChartData([0, 0, 0, 0, 0, 0, 0, 0]); // 中立に戻す (引数を明記)
+            updateComplexEmotionUI("neutral"); // タイトルに戻った時に複合感情バッジと絵文字も「中立」にリセットする
+            
+            // updata → update に修正し、中立の配列を渡す
+            updateCharacterExpression();
+            if (typeof changeLive2DEmotion === "function") {
+                changeLive2DEmotion([0, 0, 0, 0, 0, 0, 0, 0]); // ここも配列を渡す
+            }
+        }  
+
+        // --- 放置タイマー（展示用） ---
+        function resetIdleTimer() {
+            clearTimeout(idleTimeout);
+            if (!document.getElementById('title-screen').classList.contains('hidden')) return;
+            idleTimeout = setTimeout(() => {
+                console.log("Idle timeout. Resetting to title.");
+                resetToTitle();
+            }, IDLE_TIME_LIMIT);
+        }
+
+        // --- パネル開閉制御 ---
+        function togglePanel() {
+            const panel = document.getElementById('control-panel');
+            panel.classList.toggle('collapsed');
+        }
+
+        // --- チャット送信ダミー ---
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') sendMessage();
+        }
+
+        // async function resetConversation() {
+        //     if (!confirm('会話履歴と感情状態をリセットします。よろしいですか？')) return;
+        //     await fetch('/reset', { method: 'POST' });
+        //     document.getElementById('character-message').innerText =
+        //         "会話をリセットしました。話しかけてください。";
+        //     console.log('reset done');
+        // }
+        async function resetConversation() {
+            if (!confirm('会話履歴と感情状態をリセットします。よろしいですか？')) return;
+            await fetch('/reset', { method: 'POST' });
+            document.getElementById('character-message').innerText =
+                "会話をリセットしました。話しかけてください。";
+            updateChartData([0, 0, 0, 0, 0, 0, 0, 0]);
+            updateComplexEmotionUI("neutral");
+            updateCharacterExpression();
+            if (typeof changeLive2DEmotion === "function") {
+                changeLive2DEmotion([0, 0, 0, 0, 0, 0, 0, 0]);
+            }
+            console.log('reset done');
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            // 1. 入力をクリアし、ユーザー側のメッセージとして何か表示したい場合はここに書く
+            input.value = "";
+            const msgBox = document.getElementById('character-message');
+            const sendBtn = document.getElementById('send-btn');
+            // const selectedPersona = document.getElementById('persona-select').value; // 選択されたペルソナ（性格）を取得
+            const selectedCondition = document.getElementById('condition-select').value; // 感情状態
+
+            // 右パネルで選択されている感情（手動ステアリング用）を取得
+            const targetEmotion = document.getElementById('emotion-override').value; 
+
+            // 2. UIを「思考中」にロックする
+            msgBox.innerHTML = `<span style="color:#888;">思考中...</span>`;
+            input.disabled = true;
+            sendBtn.disabled = true;
+
+            try {
+                // 3. ColabのFlaskサーバー（/chat）へ本物のPOSTリクエストを送信
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        text: text,
+                        emotion: targetEmotion, // 選択した感情データもバックエンドに送る
+                        condition: selectedCondition,
+                        // persona: selectedPersona, // 性格設定をバックエンドに送信
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTPエラー: ${response.status}`);
+                }
+
+                // 4. LFMの推論結果を受け取る
+                const data = await response.json();
+
+                // 5. 推論されたテキストを画面に反映
+                msgBox.innerText = data.reply;
+
+                // レーダーチャートは α 換算で表示（目盛りの上限もサーバに合わせる）
+                emotionChart.options.scales.r.max = data.alpha_max;
+                updateChartData(data.emotion_alpha); // レーダーチャート反映（α換算）
+                updateComplexEmotionUI(data.emotion); // 表情とバッジの反映
+                updateCharacterExpression(data.emotion_state); // 感情に応じた画像切り替え（// 表情は内部状態（0〜30）で判定）
+
+                // live2d_setup.js 内のchangeLive2DEmotion 関数を呼び出す
+                if (typeof changeLive2DEmotion === "function") {
+                    changeLive2DEmotion(data.emotion_state);
+                }
+
+                // 表示したテキストを使って、裏側で音声合成をリクエスト
+                msgBox.innerHTML += `<br><span style="font-size:0.8em; color:#4da8da; animation: blink 1.5s infinite;">🔊 音声を生成中...</span>`;
+                
+                // アバターによって音声を変えるための分岐処理
+                const currentAvatar = document.getElementById('avatar-select').value;
+
+                // デフォルトの紅華フミは春日部つむぎの音声id=8
+                let targetSpeakerId = 8;
+
+                // アバターがこうかとんのときだけ「ちび式じい」にするID42
+                if (currentAvatar === "kokaton") {
+                    targetSpeakerId = 42; // 34:白上虎太郎（おこ）の話者ID（VOICEROID2）
+                } 
+
+
+                const audioRes = await fetch('/synthesize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        text: data.reply,
+                        speaker_id: targetSpeakerId, // ここで話者IDを指定してバックエンドに送る
+                    })
+                });
+                
+                const audioData = await audioRes.json();
+
+                // 音声の再生
+                if (audioData.audio_url) {
+                    msgBox.innerText = data.reply; // 「音声を生成中...」の文字を消す
+                    const audio = new Audio(audioData.audio_url);
+
+                    // リップシンク用の処理
+                    if (typeof audio.play === "function") {
+                        setLive2DLipSyncAudio(audio); // live2d_setup.js 内のリップシンク用関数にAudioオブジェクトを渡す
+                    }
+
+                    audio.play().catch(e => {
+                        console.error("ブラウザの自動再生ブロック:", e);
+                        msgBox.innerHTML += `<br><span style="font-size:0.8em; color:#ff4d4d;">⚠️ 音声再生がブラウザにブロックされました（画面のどこかをクリックしてください）</span>`;
+                    });
+                } else {
+                    msgBox.innerText = data.reply;
+                    console.error("音声生成に失敗しました");
+                }
+
+            } catch (error) {
+                console.error("通信エラー:", error);
+                msgBox.innerText = "通信エラーが発生しました。サーバーが動いているか確認してください。";
+            } finally {
+                // 6. UIのロックを解除
+                input.disabled = false;
+                sendBtn.disabled = false;
+                input.focus();
+            }
+        }
+
+        // 復号感情ラベルを受け取って、絵文字とテキストバッジを更新する関数
+        function updateComplexEmotionUI(emotionLabel) {
+            const badge = document.getElementById('complex-emotion-badge');
+            const emoji = document.getElementById('emotion-emoji');
+            
+            // 複合感情と基本感情のマッピング辞書 (適宜追加してください)
+            const emotionMap = {
+                "neutral":        { text: "Neutral (中立)",           emoji: "😐", color: "#4da8da" },
+                // 基本感情（上位2感情が隣り合わないとき）
+                "joy":            { text: "Joy (喜び)",               emoji: "😆", color: "#ffce56" },
+                "trust":          { text: "Trust (信頼)",             emoji: "😊", color: "#8fd694" },
+                "fear":           { text: "Fear (恐れ)",              emoji: "😨", color: "#2e8b57" },
+                "surprise":       { text: "Surprise (驚き)",          emoji: "😲", color: "#5bc0de" },
+                "sadness":        { text: "Sadness (悲しみ)",         emoji: "😭", color: "#9966ff" },
+                "disgust":        { text: "Disgust (嫌悪)",           emoji: "🤢", color: "#b07cc6" },
+                "anger":          { text: "Anger (怒り)",             emoji: "😡", color: "#ff6384" },
+                "anticipation":   { text: "Anticipation (期待)",      emoji: "🤩", color: "#ff9f40" },
+                // 複合感情（上位2感情が隣り合うとき。プルチックのダイアド）
+                "love":           { text: "Love (愛)",                emoji: "🥰", color: "#ff9f40" },
+                "submission":     { text: "Submission (服従)",        emoji: "🙇", color: "#8fd694" },
+                "alarm":          { text: "Alarm (警戒)",             emoji: "😱", color: "#2e8b57" },
+                "disappointment": { text: "Disappointment (失望)",    emoji: "😞", color: "#5bc0de" },
+                "remorse":        { text: "Remorse (後悔)",           emoji: "😔", color: "#9966ff" },
+                "contempt":       { text: "Contempt (軽蔑)",          emoji: "😒", color: "#ff6384" },
+                "aggressiveness": { text: "Aggressiveness (攻撃性)",  emoji: "💢", color: "#ff6384" },
+                "optimism":       { text: "Optimism (楽観)",          emoji: "😏", color: "#ffce56" }
+            };
+
+            const info = emotionMap[emotionLabel] || { text: emotionLabel, emoji: "💬", color: "#ffffff" };
+
+            badge.innerText = `Current State: ${info.text}`;
+            badge.style.color = info.color;
+            emoji.innerText = info.emoji;
+        }
+
+        // --- レーダーチャート制御 ---
+        function initRadarChart() {
+            const ctx = document.getElementById('emotionRadarChart').getContext('2d');
+            emotionChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    // バックエンドの順番に合わせる: joy, trust, fear, surprise, sadness, disgust, anger, anticipation
+                    labels: ['喜び', '信頼', '恐れ', '驚き', '悲しみ', '嫌悪', '怒り', '期待'],
+                    datasets: [{
+                        label: '感情強度',
+                        data: [0, 0, 0, 0, 0, 0, 0, 0], // 初期値0
+                        backgroundColor: 'rgba(54, 162, 235, 0.4)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255, 255, 255, 0.2)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.2)' },
+                            pointLabels: { color: '#ddd', font: { size: 10 } },
+                            // ステアリングの α 換算で表示する。上限はサーバから受け取った alpha_max に合わせる
+                            min: 0, max: 0.8,
+                            ticks: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        // マウスを乗せたときに「α 0.60」のように表示する
+                        tooltip: { callbacks: { label: (c) => `α ${Number(c.raw).toFixed(2)}` } }
+                }
+            }
+            });
+        }
+
+        function updateChartData(newData) {
+            emotionChart.data.datasets[0].data = newData;
+
+            // 色を一番強い感情に合わせて変える（演出）
+            const maxVal = Math.max(...newData);
+            const maxIdx = newData.indexOf(maxVal);
+            let color = 'rgba(54, 162, 235,'; // 既定: 青（中立・リセット時）
+
+            // 全部0（リセット直後・中立）のときは青のまま。
+            // これが無いと、最大値0の位置として先頭（喜び）が選ばれて黄色になる
+            if (maxVal > 0) {
+                if (maxIdx === 6) color = 'rgba(255, 99, 132,';       // 怒り (赤)
+                else if (maxIdx === 0) color = 'rgba(255, 206, 86,';  // 喜び (黄)
+                else if (maxIdx === 4) color = 'rgba(153, 102, 255,'; // 悲しみ (紫)
+            }
+
+            emotionChart.data.datasets[0].backgroundColor = color + '0.4)';
+            emotionChart.data.datasets[0].borderColor = color + '1)';
+            emotionChart.data.datasets[0].pointBackgroundColor = color + '1)';
+
+            emotionChart.update();
+        }
+
+        // キャラクタ名プレフィックスの辞書（アバター選択と対応）
+        // ここに新しいキャラクターを追加する場合は、キーにアバターのvalue属性、値に画像ファイル名のプレフィックスを追加すること！！
+        const characterPrefix = {
+            "kkfm": "koka_fumi",
+            "kokaton": "kokaton",
+        }
+
+        // 最も強い感情を8次元ベクトルから判定して画像パスを返す
+        function getExpressionImagePath(avatar, emotionStateArray) {
+            const emotionNames = ['joy', 'trust', 'fear', 'surprise', 'sadness', 'disgust', 'anger', 'anticipation'];
+            const prefix = characterPrefix[avatar] || "koka_fumi";
+            
+            const maxVal = Math.max(...emotionStateArray);
+            const threshold = 3.0; // この値以下なら中立扱い（要調整）
+            
+            let emotionName = "neutral";
+            if (maxVal > threshold) {
+                emotionName = emotionNames[emotionStateArray.indexOf(maxVal)];
+            }
+            
+            return `/static/assets/tmp_character_data/${prefix}_${emotionName}.png`;
+        }
+
+        
+        // Live2Dモデルを持っているキャラクターのIDリスト
+        const LIVE2D_AVATARS = ["kkfm"]; // "kkfm" が紅華フミ
+
+        // --- 感情に応じた静止画の切り替え処理 ---
+        // sendMessage() の updateChartData の直後に呼ぶ
+        function updateCharacterExpression(emotionStateArray) {
+            const selectEl = document.getElementById('avatar-select');
+            const avatar = selectEl.value;
+            const imgEl = document.getElementById('character-image');
+
+            // 現在のキャラがLive2D対応なら、静止画の処理は一切行わずに終了する
+            if (LIVE2D_AVATARS.includes(avatar)) {
+                imgEl.classList.add('hidden'); // 念のため非表示を強制
+                return; 
+            }
+
+            // --- 以下、Live2Dがないキャラ（こうかとん等）用の静止画更新処理 ---
+            const newSrc = getExpressionImagePath(avatar, emotionStateArray);
+            
+            // 画像パスが同じならスキップ
+            if (imgEl.src.endsWith(newSrc.replace('/static/assets/', ''))) return; 
+            
+            // ふわっと切り替えるアニメーション
+            imgEl.style.opacity = 0;
+            setTimeout(() => {
+                imgEl.src = newSrc;
+                imgEl.style.opacity = 1;
+            }, 200);
+        // }
+        //     const avatar = document.getElementById('avatar-select').value;
+        //     const imgEl = document.getElementById('character-image');
+        //     const newSrc = getExpressionImagePath(avatar, emotionStateArray);
+            
+        //     if (imgEl.src.endsWith(newSrc.replace('assets/', ''))) return; // 変化なければスキップ
+            
+        //     imgEl.style.opacity = 0;
+        //     setTimeout(() => {
+        //         imgEl.src = newSrc;
+        //         imgEl.style.opacity = 1;
+        //     }, 200);
+        }
+
+        function updateEmotionOverride() {
+            // パネルで感情が手動変更されたら、直ちにチャートに反映させる演出
+            const override = document.getElementById('emotion-override').value;
+            const M = emotionChart.options.scales.r.max;   // 現在のチャートの上限（α）
+            
+            if(override === 'anger') updateChartData([0, 0, 0, 0, 0, 0, M, 0]);
+            else if(override === 'sadness') updateChartData([0, 0, 0, 0, M, 0, 0, 0]);
+            else if(override === 'joy') updateChartData([M, 0, 0, 0, 0, 0, 0, 0]);
+            else updateChartData([0, 0, 0, 0, 0, 0, 0, 0]); // Autoの場合はすべて0に戻す
+        }
+
+        // --- キャラクター（アバター）画像変更制御 ---
+        // ダミー画像用の関数（将来的にlive2dモデルの切り替え処理をここに書く）
+        // function changeCharacterImage() {
+        //     const selectEl = document.getElementById('avatar-select');
+        //     const avatar = selectEl.value;
+            
+        //     // ▼プルダウンで選択されているテキスト（「紅華 フミ」や「こうかとん」）を取得
+        //     const avatarName = selectEl.options[selectEl.selectedIndex].text;
+        
+        //     // 名前の表示を更新
+        //     document.getElementById('character-name-text').innerText = avatarName;
+
+        //     const imgEl = document.getElementById('character-image');
+            
+        //     // ペルソナの値に応じた画像パスの辞書
+        //     const imagePaths = {
+        //         "kkfm": "assets/tmp_character_data/koka_fumi_neutral.png", // ← ユーザー様の環境に合わせて適宜戻してください
+        //         "kokaton": "assets/tmp_character_data/kokaton_neutral.png"
+        //     };
+
+        //     if (imagePaths[avatar]) {
+        //         imgEl.style.opacity = 0;
+        //         setTimeout(() => {
+        //             imgEl.src = imagePaths[avatar];
+        //             imgEl.style.opacity = 1;
+        //         }, 200);
+        //     }
+        // }
+
+        // --- キャラクター（アバター）画像変更制御 ---
+        function changeCharacterImage() {
+            const selectEl = document.getElementById('avatar-select');
+            const avatar = selectEl.value;
+            const avatarName = selectEl.options[selectEl.selectedIndex].text;
+            
+            // 名前の表示を更新
+            document.getElementById('character-name-text').innerText = avatarName;
+
+            const canvas = document.getElementById('live2d-canvas');
+            const imgEl = document.getElementById('character-image');
+
+            // Live2Dモードと静止画モードの完全切り替え
+            if (LIVE2D_AVATARS.includes(avatar)) {
+                // Live2Dモード（紅華フミなど）
+                canvas.classList.remove('hidden'); // Canvasを表示
+                canvas.style.opacity = 1;
+                
+                imgEl.classList.add('hidden');    // 静止画をDOMレベルで隠す
+                imgEl.style.opacity = 0;
+            } else {
+                // 静止画モード（こうかとん等）
+                canvas.classList.add('hidden');    // Canvasを隠す
+                canvas.style.opacity = 0;
+                
+                imgEl.classList.remove('hidden'); // 静止画を表示
+                imgEl.style.opacity = 1;
+
+                // プルダウン変更時の初期画像（中立）をセット
+                const imagePaths = {
+                    "kokaton": "/static/assets/tmp_character_data/kokaton_neutral.png"
+                };
+                if (imagePaths[avatar]) {
+                    imgEl.src = imagePaths[avatar];
+                }
+            }
+        }
+        
+        // --- 背景画像変更制御 ---
+        function changeBackgroundImage(imagePath) {
+            const mainView = document.getElementById('main-view');
+            
+            if (imagePath && imagePath !== "") {
+                // 画像パスが渡されたら、その画像を背景に設定
+                mainView.style.backgroundImage = `url('${imagePath}')`;
+            } else {
+                // 空文字やnullが渡されたら、インラインスタイルを消去してCSSのデフォルト背景（#2c3e50）に戻す
+                mainView.style.backgroundImage = ''; 
+            }
+        }
+
+        // 条件切り替え時の自動リセット
+        document.getElementById('condition-select').addEventListener('change', async (e) => {
+            await fetch('/reset', { method: 'POST' });
+            document.getElementById('character-message').innerText =
+                "会話をリセットしました。話しかけてください。";
+            console.log('condition changed to', e.target.value);
+        });
+
+        // ページを閉じる・再読み込み・別ページへ移動したときにリセットする。
+        //   fetch は離脱時に中断されるため、sendBeacon を使う。
+        //   sendBeacon は離脱後もブラウザが送信を保証する。
+        window.addEventListener('pagehide', () => {
+            navigator.sendBeacon('/reset');
+        });
+    </script>
+</body>
+</html>

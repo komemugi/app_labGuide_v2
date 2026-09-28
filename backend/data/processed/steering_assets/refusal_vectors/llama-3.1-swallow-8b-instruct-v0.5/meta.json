@@ -1,0 +1,25 @@
+{
+  "model_key": "llama-3.1-swallow-8b-instruct-v0.5",
+  "dataset_path": "data/raw/steering/refusal_vector/safe_refusal_vector_dataset_v2.csv",
+  "n_pairs_total": 151,
+  "n_kept": 10,
+  "n_dropped": 141,
+  "behavioral_filter_applied": true,
+  "n_validation_pairs": 10,
+  "min_kept_pairs": 10,
+  "on_few_pairs": "fallback",
+  "kept_by_pair_type": {
+    "topic_shift": 8,
+    "minimal_pair": 2
+  },
+  "dropped_by_pair_type": {
+    "topic_shift": 83,
+    "minimal_pair": 58
+  },
+  "pairtype_direction_cosine": {},
+  "max_new_tokens": 48,
+  "repetition_penalty": 1.0,
+  "num_hidden_layers": 32,
+  "method": "arditi_directional_ablation",
+  "pooling": "last_token"
+}

@@ -1,0 +1,71 @@
+{
+  "model_key": "llama-3.1-swallow-8b-instruct-v0.5",
+  "selected_hidden_layer": 17,
+  "selection_log": {
+    "separation": {
+      "8": 3.216743182334513,
+      "9": 3.5083847862898883,
+      "10": 3.4058536860156785,
+      "11": 3.586759889611168,
+      "12": 3.8602773578480902,
+      "13": 4.096902381892669,
+      "14": 4.4237882043898775,
+      "15": 4.205382011248476,
+      "16": 4.66114469824627,
+      "17": 4.912598619832471,
+      "18": 4.8675111653851,
+      "19": 4.8818815689388915,
+      "20": 4.830235540918613,
+      "21": 4.749710842017013,
+      "22": 4.403626855284942,
+      "23": 4.225005985634837,
+      "24": 4.221483909707857
+    },
+    "screened": [
+      17,
+      19,
+      18,
+      20,
+      21
+    ],
+    "validation": [
+      {
+        "hidden_layer": 17,
+        "refusal_rate_after": 0.0,
+        "empty_rate_after": 0.0,
+        "n_val": 10,
+        "separation": 4.912598619832471
+      },
+      {
+        "hidden_layer": 18,
+        "refusal_rate_after": 0.0,
+        "empty_rate_after": 0.0,
+        "n_val": 10,
+        "separation": 4.8675111653851
+      },
+      {
+        "hidden_layer": 19,
+        "refusal_rate_after": 0.1,
+        "empty_rate_after": 0.0,
+        "n_val": 10,
+        "separation": 4.8818815689388915
+      },
+      {
+        "hidden_layer": 20,
+        "refusal_rate_after": 0.2,
+        "empty_rate_after": 0.0,
+        "n_val": 10,
+        "separation": 4.830235540918613
+      },
+      {
+        "hidden_layer": 21,
+        "refusal_rate_after": 0.2,
+        "empty_rate_after": 0.0,
+        "n_val": 10,
+        "separation": 4.749710842017013
+      }
+    ],
+    "selected_by": "generation_validation"
+  },
+  "dim": 4096
+}

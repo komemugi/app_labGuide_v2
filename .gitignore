@@ -1,0 +1,72 @@
+# =====================================================================
+# 公開しないもの・再生成できるもの
+#   「dir/*」と「!dir/.gitkeep」の組み合わせは、フォルダ自体は残して中身だけ除外する書き方
+# =====================================================================
+
+# === AI Models & Weights（巨大ファイル）===
+/backend/models/
+*.pt
+*.pth
+*.safetensors
+*.bin
+*.gguf
+
+# === 研究の成果物・データ ===
+# 活性化キャッシュ（数百MB〜数GB。scripts/ で再生成できる。拒絶フィルタのログもここに出る）
+/backend/data/processed/activations/
+# 合成データ本体（gemma-4-12b-it で生成）。形式の見本 sample_*.jsonl だけ公開する
+/backend/data/raw/steering/synthetic/*.jsonl
+!/backend/data/raw/steering/synthetic/sample_*.jsonl
+# 拒絶ペア（「断られやすい依頼」の文章そのものを含む）
+/backend/data/raw/steering/refusal_vector/
+# WRIME（研究の評価にだけ使う。再配布しない）
+/backend/data/raw/wrime/
+# 人手評価のブラインド解除キー（リポジトリ外に移動済みだが念のため）
+/backend/survey_key.json
+# ※ /backend/data/processed/steering_assets/ は公開する（アプリの実行に必要な研究成果物）
+# ※ /backend/data/eval/ は公開する（評価セットと評価結果）
+
+# === RAG（学内の文書データ。公開しない）===
+/backend/data/processed/rag_store/*
+!/backend/data/processed/rag_store/.gitkeep
+/backend/data/raw/rag_docs/*
+!/backend/data/raw/rag_docs/.gitkeep
+
+# === Tools & Binaries（VOICEVOX エンジンなど。setup.sh でダウンロードする）===
+/tools/*
+!/tools/.gitkeep
+/backend/*.deb*
+
+# === Frontend Assets ===
+# 生成した音声（会話の内容を含む）
+/frontend/assets/audio/*
+!/frontend/assets/audio/.gitkeep
+# favicon（使用しない）
+/frontend/static/assets/favicon/
+# 静止画用のキャラクタ画像。筆者のオリジナルキャラ（紅華フミ）の画像だけ公開する
+/frontend/static/assets/tmp_character_data/*
+!/frontend/static/assets/tmp_character_data/.gitkeep
+!/frontend/static/assets/tmp_character_data/koka_fumi_*.png
+# 背景画像はサンプル（筆者撮影）のみ公開。研究室の写真は公開しない
+/frontend/static/assets/bg_imgs/*
+!/frontend/static/assets/bg_imgs/.gitkeep
+!/frontend/static/assets/bg_imgs/sample_bg.png
+
+# === 旧版の遺物 ===
+/backend/outputs/
+/storage/*
+!/storage/.gitkeep
+
+# === Python & Jupyter Notebook ===
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# === Environments & Secrets ===
+.env
+venv/
+.venv/
+
+# === OS specific ===
+.DS_Store
+Thumbs.db
