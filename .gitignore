@@ -26,11 +26,14 @@
 # ※ /backend/data/processed/steering_assets/ は公開する（アプリの実行に必要な研究成果物）
 # ※ /backend/data/eval/ は公開する（評価セットと評価結果）
 
-# === RAG（学内の文書データ。公開しない）===
+# === RAG ===
+# 検索用インデックス（利用者が build_index.py で作る。公開しない）
 /backend/data/processed/rag_store/*
 !/backend/data/processed/rag_store/.gitkeep
+# 文書はキャラクター設定（kokaFumi.txt）だけ公開し、それ以外は公開しない
 /backend/data/raw/rag_docs/*
 !/backend/data/raw/rag_docs/.gitkeep
+!/backend/data/raw/rag_docs/kokaFumi.txt
 
 # === Tools & Binaries（VOICEVOX エンジンなど。setup.sh でダウンロードする）===
 /tools/*
