@@ -5,16 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Character Demo</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    
-    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>  レーダーチャート用 -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script> <!-- Chart.js の読み込みをバージョン固定にして将来の更新で表示が壊れるのを防ぐ -->
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.3.12/pixi.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display@0.4.0/dist/cubism4.min.js"></script>    
-    <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display/dist/cubism4.min.js"></script>
-    <script src="/static/js/live2d_setup.js" defer></script>
+    <link rel="icon" href="data:,">  <!-- favicon なし（ブラウザが /favicon.ico を探しに行ってエラーを出さないようにする） -->
 
-    <link rel="icon" href="/static/assets/favicon/animal_mark13_penguin.png"> <!-- タブアイコン なんか表示されていないので時間があるときに直す-->
+    <!-- レーダーチャート（バージョンを固定して、将来の更新で表示が壊れるのを防ぐ） -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <!-- Live2D の表示：この3行は、この順番で読み込む必要がある -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.3.12/pixi.min.js"></script>                   <!-- 描画ライブラリ -->
+    <script src="https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js"></script>               <!-- Live2D Cubism Core（Live2D 公式から読み込む） -->
+    <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display@0.4.0/dist/cubism4.min.js"></script>        <!-- Live2D を PixiJS で表示するライブラリ -->
+    <script src="/static/js/live2d_setup.js" defer></script>
 </head>
 <body>
 
@@ -81,7 +81,7 @@
                 <h3>Avatar (Visual)</h3>
                 <select id="avatar-select" onchange="changeCharacterImage()">
                     <option value="kkfm">紅華 フミ（Koka Fumi）</option>
-                    <!-- <option value="kokaton">こうかとん</option> -->
+                    <option value="kokaton">こうかとん</option>
                 </select>
             </div>
 
